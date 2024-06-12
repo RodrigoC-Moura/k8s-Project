@@ -16,7 +16,6 @@ spec:
       - name: ejbca
         image: keyfactor/ejbca-ce:latest
         ports:
-        - containerPort: 8080
         - containerPort: 8443
         env:
         - name: MYSQL_USER
@@ -37,10 +36,6 @@ spec:
   selector:
     app: ejbca
   ports:
-    - name: http
-      protocol: TCP
-      port: 8080
-      targetPort: 8080
     - name: https
       protocol: TCP
       port: 8443
