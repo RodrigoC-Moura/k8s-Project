@@ -34,22 +34,9 @@ data:
   default.conf: |
     server {
         listen 80;
-        server_name plik.moura.cloudns.ch;
-        
-        location /plik {
-            proxy_pass http://plik-service.default.svc.cluster.local:8080;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-    }
-
-    server {
-        listen 80;
         server_name wiki.moura.cloudns.ch;
 
-        location ../wiki {
+        location / {
             proxy_pass http://34.229.217.224:30002/;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
