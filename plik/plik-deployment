@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ypublic-ip-addresses
+source public-ip-addresses
 
 echo "Create a deployment for a flask application"
 kubectl apply -f plik-deployment.yaml
