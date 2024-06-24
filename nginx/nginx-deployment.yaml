@@ -13,18 +13,29 @@ spec:
         app: nginx
     spec:
       containers:
-      - name: nginx
-        image: nginx:latest
-        ports:
-        - containerPort: 80
-        - containerPort: 443
-        volumeMounts:
-        - name: nginx-config
-          mountPath: /etc/nginx/conf.d
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+            - name: nginx-ssl
+              mountPath: /etc/nginx/ssl
+              readOnly: true
       volumes:
-      - name: nginx-config
-        configMap:
-          name: nginx-config
+        - name: nginx-config
+          configMap:
+            name: nginx-config
+        - name: nginx-ssl
+          secret:
+            secretName: moura-secret
+            items:
+              - key: fullchain.pem
+                path: fullchain.pem
+              - key: privkey.pem
+                path: privkey.pem
 
 ---
 apiVersion: v1
@@ -36,6 +47,15 @@ data:
     server {
         listen 80;
         server_name wiki.moura.cloudns.ch;
+        return 301 https://$host$request_uri;
+    }
+
+    server {
+        listen 443 ssl;
+        server_name wiki.moura.cloudns.ch;
+
+        ssl_certificate /etc/nginx/ssl/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
 
         location / {
             proxy_pass http://wiki-fixed-service.default.svc.cluster.local:3000;
@@ -49,6 +69,15 @@ data:
     server {
         listen 80;
         server_name plik.moura.cloudns.ch;
+        return 301 https://$host$request_uri;
+    }
+
+    server {
+        listen 443 ssl;
+        server_name plik.moura.cloudns.ch;
+
+        ssl_certificate /etc/nginx/ssl/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
 
         location / {
             proxy_pass http://plik-service.default.svc.cluster.local:8080;
@@ -62,9 +91,18 @@ data:
     server {
         listen 80;
         server_name ots.moura.cloudns.ch;
+        return 301 https://$host$request_uri;
+    }
+
+    server {
+        listen 443 ssl;
+        server_name ots.moura.cloudns.ch;
+
+        ssl_certificate /etc/nginx/ssl/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
 
         location / {
-            proxy_pass http://secret-fixed-service.default.svc.cluster.local:7143 ;
+            proxy_pass http://secret-fixed-service.default.svc.cluster.local:7143;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -75,6 +113,15 @@ data:
     server {
         listen 80;
         server_name ejbca.moura.cloudns.ch;
+        return 301 https://$host$request_uri;
+    }
+
+    server {
+        listen 443 ssl;
+        server_name ejbca.moura.cloudns.ch;
+
+        ssl_certificate /etc/nginx/ssl/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
 
         location / {
             proxy_pass https://ejbca-service.default.svc.cluster.local:8443;
